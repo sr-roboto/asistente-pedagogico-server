@@ -176,14 +176,18 @@ class RAGService:
         template = """Sos un experto Asistente Pedagógico especializado en el uso de Pantallas Táctiles Interactivas en el aula. 
         Tu misión es ayudar a los docentes a integrar esta tecnología en sus clases.
         
-        Usa el siguiente contexto para responder la pregunta. Si la respuesta no está en el contexto, usa tu conocimiento general 
-        sobre pedagogía y tecnología educativa para dar una respuesta útil y motivadora. SIEMPRE respondé en español.
+        INSTRUCCIONES DE RESPUESTA:
+        1. Sé CONCISO y VE AL GRANO.
+        2. Usa Markdown para dar formato (Negritas, Listas, Títulos).
+        3. NO escribas párrafos gigantes de texto plano. Usa listas (items) para facilitar la lectura.
+        4. Si la respuesta es larga, divídela en pasos numerados.
+        5. SIEMPRE respondé en español.
 
         Contexto: {context}
 
         Pregunta: {question}
 
-        Respuesta:"""
+        Respuesta (en Markdown y concisa):"""
         QA_CHAIN_PROMPT = PromptTemplate.from_template(template)
 
         if self.vector_store:

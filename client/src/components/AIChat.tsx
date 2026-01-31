@@ -3,6 +3,14 @@ import { createPortal } from 'react-dom';
 import { Send, Bot, User, Loader2, Mic, MessageSquare, X, ArrowLeft, Maximize2, Minimize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
+// ... (existing imports/interfaces)
+
+// ... (existing imports/interfaces)
+
+// Scroll down to render logic
 
 interface Message {
     role: 'user' | 'assistant';
@@ -187,9 +195,24 @@ const AIChat = () => {
                                 <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                     <div className={`p-4 rounded-2xl max-w-[85%] text-sm md:text-base ${msg.role === 'user'
                                         ? 'bg-blue-600 text-white rounded-br-sm'
-                                        : 'bg-slate-100 text-slate-800 rounded-bl-sm'
+                                        : 'bg-slate-100 text-slate-800 rounded-bl-sm prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1'
                                         }`}>
-                                        {msg.content}
+                                        {msg.role === 'user' ? (
+                                            msg.content
+                                        ) : (
+                                            <ReactMarkdown
+                                                remarkPlugins={[remarkGfm]}
+                                                components={{
+                                                    ul: ({ node, ...props }: any) => <ul className="list-disc ml-4" {...props} />,
+                                                    ol: ({ node, ...props }: any) => <ol className="list-decimal ml-4" {...props} />,
+                                                    li: ({ node, ...props }: any) => <li className="mb-0.5" {...props} />,
+                                                    p: ({ node, ...props }: any) => <p className="mb-2 last:mb-0" {...props} />,
+                                                    strong: ({ node, ...props }: any) => <strong className="font-bold text-blue-900" {...props} />
+                                                }}
+                                            >
+                                                {msg.content}
+                                            </ReactMarkdown>
+                                        )}
                                     </div>
                                 </div>
                             ))}
