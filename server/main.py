@@ -44,6 +44,10 @@ async def startup_event():
     data_dir = os.path.join(os.path.dirname(__file__), "data")
     rag_service.ingest_pdfs(data_dir)
 
+from fastapi.responses import StreamingResponse
+
+# ... (existing code)
+
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
     # Simulate processing delay related to AI
@@ -56,6 +60,15 @@ async def chat_endpoint(request: ChatRequest):
     response_text = rag_service.get_answer(user_msg)
 
     return ChatResponse(response=response_text)
+
+@app.post("/api/chat/stream")
+async def chat_stream_endpoint(request: ChatRequest):
+    user_msg = request.message
+    
+    return StreamingResponse(
+        rag_service.stream_answer(user_msg), 
+        media_type="text/plain"
+    )
 
 if __name__ == "__main__":
     import uvicorn

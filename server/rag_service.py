@@ -202,7 +202,7 @@ class RAGService:
             print("Vector Store not available. QA Chain skipped.")
 
     def get_answer(self, query: str) -> str:
-        """Retrieves answer from RAG chain."""
+        """Retrieves answer from RAG chain (Synchronous)."""
         if not self.qa_chain:
             return "I am not initialized with any documents yet. Please add PDF files to the data folder."
         
@@ -211,6 +211,81 @@ class RAGService:
             return result["result"]
         except Exception as e:
             return f"Error generating answer: {str(e)}"
+
+    def stream_answer(self, query: str):
+        """Generates a streaming answer from the RAG chain."""
+        if not self.qa_chain:
+            yield "I am not initialized with any documents yet. Please add PDF files to the data folder."
+            return
+
+        # --- SMART GREETING LOGIC ---
+        query_lower = query.lower().strip()
+        greetings = ["hola", "buenos dias", "buenas tardes", "buenas noches", "qué tal", "como estas"]
+        
+        # Exact match or starts with greeting (simple heuristic)
+        is_greeting = any(query_lower.startswith(g) for g in greetings) and len(query_lower) < 20
+        
+        if is_greeting:
+            # Simple response generator
+            response = "¡Hola! Soy Tomi, tu asistente pedagógico. ¿En qué puedo ayudarte hoy a integrar la tecnología en tu aula?"
+            # Simulate streaming
+            for word in response.split():
+                yield word + " "
+                time.sleep(0.05)
+            return
+        # ---------------------------
+
+        try:
+            # We need to use the chain slightly differently for streaming
+            # Or use the LLM directly with the context if we want fine-grained control, 
+            # but chain.stream is supported in newer LangChain versions.
+            # However, RetrievalQA might not stream the "result" key easily without newer syntax.
+            # Let's try the modern .stream() method on the chain.
+            
+            # The result of .stream() on RetrievalQA is a stream of dictionaries.
+            # We need to extract the "result" from the final step or tokens from the LLM.
+            
+            # A more robust way with standard RetrievalQA is to use a callback or just standard .stream() 
+            # if the chain supports it. 
+            
+            # Let's try standard .stream() first.
+            for chunk in self.qa_chain.stream({"query": query}):
+                # RetrievalQA stream yields the full result at the end usually, not tokens, 
+                # unless we configured the LLM to stream.
+                
+                # Actually, for true token streaming with RetrievalQA, we often need to construct the chain 
+                # with a specific callback or use the newer LECL (LangChain Expression Language).
+                # But let's try a simpler approach: 
+                # We will manually retrieve docs and then stream the LLM.
+                pass
+
+            # ALTERNATIVE: Manual RAG for Streaming (More reliable for simple setups)
+            docs = self.vector_store.as_retriever().get_relevant_documents(query)
+            context = "\n\n".join([doc.page_content for doc in docs])
+            
+            prompt = f"""Sos un experto Asistente Pedagógico especializado en el uso de Pantallas Táctiles Interactivas en el aula. 
+            Tu misión es ayudar a los docentes a integrar esta tecnología en sus clases.
+            
+            INSTRUCCIONES DE RESPUESTA:
+            1. Sé CONCISO y VE AL GRANO.
+            2. Usa Markdown para dar formato (Negritas, Listas, Títulos).
+            3. NO escribas párrafos gigantes de texto plano. Usa listas (items) para facilitar la lectura.
+            4. Si la respuesta es larga, divídela en pasos numerados.
+            5. SIEMPRE respondé en español.
+
+            Contexto: {context}
+
+            Pregunta: {query}
+
+            Respuesta (en Markdown y concisa):"""
+            
+            # Stream directly from LLM
+            for chunk in self.llm.stream(prompt):
+                # chunk is an AIMessageChunk
+                yield chunk.content
+                
+        except Exception as e:
+            yield f"Error generating stream: {str(e)}"
 
 # Singleton usage
 rag_service = RAGService()

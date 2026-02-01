@@ -11,6 +11,9 @@ export default {
                 'handwriting': ['Quicksand', 'sans-serif'],
                 'sans': ['Quicksand', 'sans-serif'], // Set Quicksand as default sans
             },
+            aspectRatio: {
+                '4/5': '4/5',
+            },
             animation: {
                 'bounce-slight': 'bounceSlight 0.5s infinite alternate',
                 'float': 'float 3s ease-in-out infinite',
