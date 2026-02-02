@@ -23,7 +23,7 @@ const Landing = () => {
                         <h1 className="text-5xl md:text-7xl font-sans font-bold leading-tight text-slate-900">
                             Bienvenido a <br />
                             <span className="bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">
-                                Tomi Digital
+                                Pantallas Táctiles
                             </span>
                         </h1>
 

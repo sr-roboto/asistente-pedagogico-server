@@ -1,14 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, Mic, Volume2, VolumeX, StopCircle, History, X } from 'lucide-react';
+import { Send, Bot, User, Loader2, Mic, Volume2, VolumeX, StopCircle, History, X, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
-// ... (existing imports/interfaces)
-
-// ... (existing imports/interfaces)
-
-// Scroll down to render logic
+import { useNavigate } from 'react-router-dom';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -114,7 +109,7 @@ const cleanTextForSpeech = (text: string): string => {
 };
 
 const AIChat = () => {
-    // navigate removed as it is the main page now
+    const navigate = useNavigate();
     const [messages, setMessages] = useState<Message[]>([
         { role: 'assistant', content: '¡Hola! Soy Tomi. ¿Qué te gustaría saber o hacer hoy?' }
     ]);
@@ -386,6 +381,17 @@ const AIChat = () => {
                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-indigo-900 via-slate-900 to-purple-900 animate-gradient-xy"></div>
                 <div className="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[120px] animate-pulse-slow mix-blend-screen" />
                 <div className="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-[120px] animate-pulse-slow delay-1000 mix-blend-screen" />
+            </div>
+
+            {/* Navigation Buttons (Top Left) */}
+            <div className="absolute top-4 left-4 z-50">
+                <button
+                    onClick={() => navigate('/')}
+                    className="p-3 bg-white/10 backdrop-blur-md rounded-full text-white shadow-lg hover:bg-white/20 transition-all border border-white/10"
+                    title="Volver al Inicio"
+                >
+                    <Home size={24} />
+                </button>
             </div>
 
             {/* History Toggle Button (Top Right) */}

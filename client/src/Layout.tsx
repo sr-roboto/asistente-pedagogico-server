@@ -33,7 +33,7 @@ const Layout = () => {
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <span className="font-display font-bold text-2xl tracking-tight text-slate-900">
-                Tomi<span className="text-green-600">Digital</span>
+                Pantallas<span className="text-green-600">Táctiles</span>
               </span>
             </div>
 
