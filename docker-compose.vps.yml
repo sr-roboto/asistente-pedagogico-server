@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # RAG API Server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - HOST=0.0.0.0
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - AI_PROVIDER=ollama
+      - PORT=8000
+    volumes:
+      # Persist FAISS indexes (Vector DB)
+      # Matching the paths defined in rag_service.py specific to fastembed
+      - ./server/faiss_index_ollama_fastembed:/app/faiss_index_ollama_fastembed
+      - ./server/faiss_index_gemini_fastembed:/app/faiss_index_gemini_fastembed
+      # Persist raw data (PDFs)
+      - ./server/data:/app/data
+    depends_on:
+      - ollama
+    networks:
+      - tomi-network
+
+  # Ollama Service (The LLM Host)
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    container_name: ollama
+    volumes:
+      - ollama_storage:/root/.ollama
+    networks:
+      - tomi-network
+    # Expose port mostly for debugging, internal communication happens via network
+    expose:
+      - "11434"
+
+  # Frontend (Client)
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - VITE_API_URL=/api
+    depends_on:
+      - server
+    networks:
+      - tomi-network
+
+volumes:
+  ollama_storage:
+
+
+networks:
+  tomi-network:
+    driver: bridge
