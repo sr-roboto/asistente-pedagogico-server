@@ -311,9 +311,9 @@ const AIChat = () => {
             abortControllerRef.current = new AbortController();
 
             // Dynamic URL for mobile/external access
-            const protocol = window.location.protocol; // http: or https:
-            const hostname = window.location.hostname; // localhost or 192.168.x.x
-            const apiUrl = `${protocol}//${hostname}:8000/api/chat/stream`;
+            // In production (Nginx), we should just use /api which proxies to the backend.
+            // In dev, Vite proxies /api to 8000.
+            const apiUrl = `/api/chat/stream`;
 
             const response = await fetch(apiUrl, {
                 method: 'POST',

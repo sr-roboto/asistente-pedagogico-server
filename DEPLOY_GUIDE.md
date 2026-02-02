@@ -9,53 +9,51 @@ En el panel de tu proveedor (según tu captura de pantalla):
 2. Completa el proceso de instalación del VPS.
 3. Anota la **IP Pública**, el **Usuario** (usualmente `root`) y la **Contraseña** que te asignen.
 
-## 2. Conexión al VPS
-Desde tu computadora (Windows):
-1. Espera unos minutos hasta que la barra amarilla "Instalando..." desaparezca del panel de DonWeb.
-2. Abre una terminal (PowerShell o CMD).
-3. Conéctate por SSH (¡Ojo! Tu servidor usa el puerto 5377):
-   ```powershell
-   ssh -p 5377 root@149.50.142.96
-   ```
-4. Ingresa la contraseña que creaste en el paso anterior.
-   *(Si te pregunta "Are you sure you want to continue connecting?", escribe `yes` y dale Enter)*.
+## 3. Transferencia de Archivos (Método Git - Recomendado)
+Como elegiste usar Git, sigue estos pasos:
 
-## 3. Transferencia de Archivos
-Necesitamos subir tu código al servidor. Puedes hacerlo de dos formas:
-
-### Opción A: Usando Git (Recomendado si usas GitHub/GitLab)
-Sube tu código a un repositorio y clónalo en el VPS:
-```bash
-git clone https://github.com/tu-usuario/tomi-chatbot.git
-cd tomi-chatbot
-```
-
-### Opción B: Copia Directa (Si tienes el código solo en tu PC)
-Desde tu terminal de Windows (NO dentro del SSH, abre una nueva):
+### Paso A: En tu computadora local (VS Code)
+Sube los archivos de configuración (`deploy_vps.sh`, `docker-compose.vps.yml`) a tu repositorio:
 ```powershell
-# Asegúrate de estar en la carpeta donde está 'tomi-chatbot'
-cd C:\Users\marco\Documents
-# Nota: scp usa -P (mayúscula) para el puerto
-scp -P 5377 -r tomi-chatbot root@149.50.142.96:/root/
+# Abre una NUEVA terminal en VS Code
+git add .
+git commit -m "Configuración VPS y Ollama"
+git push origin main
 ```
 
-## 4. Despliegue Automático
-Una vez que tengas la carpeta `tomi-chatbot` en el VPS:
+### Paso B: En el VPS
+Vuelve a la terminal donde tienes el SSH abierto:
+```bash
+# 1. Clona tu repositorio (si ya existe la carpeta, bórrala primero con: rm -rf tomi-chatbot)
+git clone https://github.com/MARCOS-G-G/tomi-chatbot.git
+cd tomi-chatbot
 
-1. Entra a la carpeta en el VPS:
-   ```bash
-   cd /root/tomi-chatbot
-   ```
+# 2. Ejecuta el despliegue (Ya está configurado para OLLAMA, no necesitas claves extra)
+chmod +x deploy_vps.sh
+./deploy_vps.sh
+```
 
-2. Ejecuta el script de instalación que he preparado (`deploy_vps.sh`):
-   ```bash
-   # Dar permisos de ejecución
-   chmod +x deploy_vps.sh
-   
-   # Ejecutar despliegue
-   ./deploy_vps.sh
-   ```
-   > **Nota:** Este script se encargará de levantar los contenedores de Docker (Ollama, Servidor RAG, Cliente) y descargar el modelo Llama 3.2.
+## 4. Verificación
+Una vez que el script termine (puede tardar descargando el modelo):
+1.  Verifica que los contenedores estén corriendo:
+    ```bash
+    docker ps
+    ```
+2.  Abre tu navegador en: `http://149.50.142.96`
+
+## 5. Carga de Documentos (Base de Conocimiento)
+Para que el RAG funcione, necesitas subir tus PDFs a la carpeta `server/data` del VPS.
+*Nota: Como usas Git, la carpeta `data` estará vacía. Tienes que subir los PDFs manualmente por SCP.*
+
+```powershell
+# Desde tu PC local (Terminal nueva)
+scp -P 5377 C:\Users\marco\Documents\tomi-chatbot\server\data\*.pdf root@149.50.142.96:/root/tomi-chatbot/server/data/
+```
+Luego reinicia el servidor para procesarlos:
+```bash
+# En el VPS
+docker compose -f docker-compose.vps.yml restart server
+```
 
 ## 5. Carga de Documentos (Base de Conocimiento)
 Para que el RAG funcione, necesitas subir tus PDFs:
