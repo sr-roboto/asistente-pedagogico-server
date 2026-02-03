@@ -33,7 +33,7 @@ class ChatResponse(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"status": "ok", "message": "Tomi Chatbot API is running"}
+    return {"status": "ok", "message": "Asistente Pedagogico API is running"}
 
 @app.on_event("startup")
 async def startup_event():
