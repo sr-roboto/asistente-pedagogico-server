@@ -60,40 +60,38 @@ const PedagogicalAvatar = ({ state }: { state: AvatarState }) => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setIsGreeting(false);
-            // After greeting, ensure we go to frame 5 (Attentive) as requested
+            // After greeting, ensure we go to frame 5 if idle
             if (state !== 'speaking') setFrame(5);
-        }, 2000); // Greeting lasts 2s
+        }, 3000); // Extended greeting slightly
         return () => clearTimeout(timer);
     }, []);
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
 
-        // Priority 1: Greeting
-        if (isGreeting) {
-            setFrame(8);
-            return;
-        }
-
-        // Priority 2: State-based animations
+        // Priority 1: Speaking (Always overrides greeting)
         if (state === 'speaking') {
-            // Strict Loop: 1 -> 3 -> 2
+            // Strict Loop: 3 -> 2
             let step = 0;
-            const sequence = [1, 3, 2];
+            const sequence = [3, 2];
 
             interval = setInterval(() => {
                 setFrame(sequence[step % sequence.length]);
                 step++;
             }, 180); // Speed of animation
 
-        } else if (state === 'thinking') {
-            // Frame 6 (Thinking)
+        }
+        // Priority 2: Greeting (Only if not speaking)
+        else if (isGreeting) {
+            setFrame(8);
+        }
+        // Priority 3: State-based animations
+        else if (state === 'thinking') {
             setFrame(6);
         } else if (state === 'listening') {
-            // Frame 5 (Listening/Attentive)
             setFrame(5);
         } else {
-            // Idle / Finished Speaking -> Frame 5 (Attentive) as requested
+            // Idle / Finished Speaking -> Frame 5 (Attentive)
             setFrame(5);
         }
 
@@ -143,6 +141,16 @@ const AIChat = () => {
     const [subtitle, setSubtitle] = useState('');
     const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
     const [manualVoice, setManualVoice] = useState<SpeechSynthesisVoice | null>(null);
+
+    // Initial Greeting Speech
+    useEffect(() => {
+        // Wait a brief moment for voices to load or just start
+        const timer = setTimeout(() => {
+            const welcomeMsg = '¡Hola! Soy tu Asistente Pedagógico Virtual. Estoy aquí para potenciar tus clases. ¿En qué puedo ayudarte hoy?';
+            speakText(welcomeMsg);
+        }, 1000); // 1s delay to seem natural
+        return () => clearTimeout(timer);
+    }, [voices]); // Re-try if voices load later
 
     useEffect(() => {
         const loadVoices = () => {
@@ -504,7 +512,7 @@ const AIChat = () => {
                         <button
                             type="button"
                             onClick={handleVoiceInput}
-                            className={`p-4 rounded-full transition-all duration-300 ${isListening ? 'bg-red-500 text-white scale-110 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.4)]' : 'bg-slate-800 text-teal-400 hover:bg-slate-700'}`}
+                            className={`flex-shrink-0 p-4 rounded-full transition-all duration-300 ${isListening ? 'bg-red-500 text-white scale-110 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.4)]' : 'bg-slate-800 text-teal-400 hover:bg-slate-700'}`}
                         >
                             <Mic size={24} />
                         </button>
@@ -514,7 +522,7 @@ const AIChat = () => {
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             placeholder="Escribe tu consulta pedagógica aquí..."
-                            className="flex-1 bg-transparent border-none px-2 text-lg text-slate-100 placeholder-slate-500 focus:ring-0 outline-none font-light"
+                            className="flex-1 bg-transparent border-none px-2 text-lg text-slate-100 placeholder-slate-500 focus:ring-0 outline-none font-light min-w-0"
                         />
 
                         <AnimatePresence>
@@ -525,7 +533,7 @@ const AIChat = () => {
                                     exit={{ scale: 0, rotate: 45 }}
                                     type="submit"
                                     disabled={isLoading}
-                                    className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white p-4 rounded-full shadow-lg hover:shadow-teal-500/25 transition-all active:scale-95"
+                                    className="flex-shrink-0 bg-gradient-to-r from-teal-500 to-emerald-500 text-white p-4 rounded-full shadow-lg hover:shadow-teal-500/25 transition-all active:scale-95"
                                 >
                                     <Send size={24} />
                                 </motion.button>
