@@ -13,4 +13,4 @@ pypdf
 faiss-cpu
 python-dotenv
 gTTS
-fastembed==0.3.3
+fastembed

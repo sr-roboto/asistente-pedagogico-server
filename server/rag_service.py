@@ -37,7 +37,7 @@ class RAGService:
         # --- UNIVERSAL EMBEDDINGS (FastEmbed) ---
         # We use FastEmbed for EVERY provider to avoid rate limits and keep it fast/light.
         print("Initializing FastEmbed (Lightweight CPU Embeddings)...")
-        self.embeddings = FastEmbedEmbeddings(model_name="BAAI/bge-small-en-v1.5")
+        self.embeddings = FastEmbedEmbeddings()
 
         if self.provider == "gemini":
             # --- GOOGLE GEMINI CONFIGURATION ---
