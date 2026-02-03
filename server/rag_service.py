@@ -213,7 +213,7 @@ class RAGService:
 
     def _setup_qa_chain(self):
         # Custom Prompt Template
-        template = """Sos un experto Asistente Pedagógico especializado en el uso de Pantallas Táctiles Interactivas en el aula. 
+        template = """Sos un Asistente Pedagógico para Pantallas Táctiles, un experto en tecnología educativa.  
         Tu misión es ayudar a los docentes a integrar esta tecnología en sus clases.
         
         INSTRUCCIONES DE RESPUESTA:
@@ -267,7 +267,7 @@ class RAGService:
         
         if is_greeting:
             # Simple response generator
-            response = "¡Hola! Soy Tomi, tu asistente pedagógico. ¿En qué puedo ayudarte hoy a integrar la tecnología en tu aula?"
+            response = "¡Hola! Soy tu Asistente Pedagógico para Pantallas Táctiles. ¿En qué puedo ayudarte hoy a integrar la tecnología en tu aula?"
             # Simulate streaming
             for word in response.split():
                 yield word + " "
@@ -303,7 +303,7 @@ class RAGService:
             docs = self.vector_store.as_retriever().get_relevant_documents(query)
             context = "\n\n".join([doc.page_content for doc in docs])
             
-            prompt = f"""Sos un experto Asistente Pedagógico especializado en el uso de Pantallas Táctiles Interactivas en el aula. 
+            prompt = f"""Sos un Asistente Pedagógico para Pantallas Táctiles, un experto en tecnología educativa.  
             Tu misión es ayudar a los docentes a integrar esta tecnología en sus clases.
             
             INSTRUCCIONES DE RESPUESTA:

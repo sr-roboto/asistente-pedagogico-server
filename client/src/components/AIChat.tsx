@@ -78,7 +78,7 @@ const PedagogicalAvatar = ({ state }: { state: AvatarState }) => {
             interval = setInterval(() => {
                 setFrame(sequence[step % sequence.length]);
                 step++;
-            }, 180); // Speed of animation
+            }, 240); // Slower speed (was 180)
 
         }
         // Priority 2: Greeting (Only if not speaking)
