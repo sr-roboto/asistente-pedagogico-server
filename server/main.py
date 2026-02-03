@@ -31,11 +31,9 @@ class ChatResponse(BaseModel):
     response: str
     sentiment: str = "neutral"
 
-    return StreamingResponse(audio_buffer, media_type="audio/mpeg")
-
-# @app.get("/")
-# def read_root():
-#     return {"status": "ok", "message": "Asistente Pedagogico API is running"}
+@app.get("/")
+def read_root():
+    return {"status": "ok", "message": "Asistente Pedagogico API is running"}
 
 @app.on_event("startup")
 async def startup_event():
@@ -75,8 +73,6 @@ def tts_endpoint(request: TTSRequest):
     if not audio_buffer:
         raise HTTPException(status_code=500, detail="TTS Generation failed")
     
-
-
     return StreamingResponse(audio_buffer, media_type="audio/mpeg")
 
 if __name__ == "__main__":
