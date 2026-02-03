@@ -10,6 +10,9 @@ WORKDIR /app
 # Copy the requirements file into the container
 COPY requirements.txt .
 
+# Install CPU-only PyTorch to save massive space (avoids CUDA bloat)
+RUN pip install --no-cache-dir torch --extra-index-url https://download.pytorch.org/whl/cpu
+
 # Install any needed packages specified in requirements.txt
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
