@@ -68,8 +68,38 @@ async def chat_stream_endpoint(request: ChatRequest):
         media_type="text/plain"
     )
 
+from auth_service import auth_service, get_current_user, User, Token
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import Depends, status
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+
+@app.post("/api/auth/register", response_model=Token)
+async def register(user: UserCreate):
+    new_user = auth_service.create_user(user.username, user.password)
+    if not new_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already registered"
+        )
+    access_token = auth_service.create_access_token(data={"sub": new_user["username"]})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.post("/api/auth/login", response_model=Token)
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = auth_service.get_user(form_data.username)
+    if not user or not auth_service.verify_password(form_data.password, user['password_hash']):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token = auth_service.create_access_token(data={"sub": user["username"]})
+    return {"access_token": access_token, "token_type": "bearer"}
+
 class PostCreate(BaseModel):
-    author: str
     content: str
 
 @app.get("/api/community/posts")
@@ -77,11 +107,12 @@ def get_posts():
     return community_service.get_posts()
 
 @app.post("/api/community/posts")
-def create_post(post: PostCreate):
-    return community_service.create_post(post.author, post.content)
+def create_post(post: PostCreate, current_user: User = Depends(get_current_user)):
+    # Use the authenticated user's username
+    return community_service.create_post(current_user['username'], post.content)
 
 @app.post("/api/community/posts/{post_id}/like")
-def like_post(post_id: str):
+def like_post(post_id: str, current_user: User = Depends(get_current_user)):
     updated_post = community_service.like_post(post_id)
     if not updated_post:
         raise HTTPException(status_code=404, detail="Post not found")
