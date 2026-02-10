@@ -22,12 +22,18 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+import hashlib
+
 class AuthService:
+    def _pre_hash(self, password: str) -> str:
+        # Pre-hash with SHA-256 prevents bcrypt 72 byte limit error
+        return hashlib.sha256(password.encode()).hexdigest()
+
     def verify_password(self, plain_password, hashed_password):
-        return pwd_context.verify(plain_password, hashed_password)
+        return pwd_context.verify(self._pre_hash(plain_password), hashed_password)
 
     def get_password_hash(self, password):
-        return pwd_context.hash(password)
+        return pwd_context.hash(self._pre_hash(password))
 
     def get_user(self, db: Session, username_or_email: str):
         # Check by username
