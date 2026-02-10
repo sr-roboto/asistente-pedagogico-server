@@ -1,7 +1,7 @@
 import os
 import time
 from typing import Dict, Optional
-from passlib.context import CryptContext
+import bcrypt
 from jose import JWTError, jwt
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
@@ -15,7 +15,6 @@ SECRET_KEY = "tu_clave_secreta_super_segura" # En produccion usar .env
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 1 week
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 class Token(BaseModel):
@@ -30,10 +29,17 @@ class AuthService:
         return hashlib.sha256(password.encode()).hexdigest()
 
     def verify_password(self, plain_password, hashed_password):
-        return pwd_context.verify(self._pre_hash(plain_password), hashed_password)
+        # bcrypt.checkpw expects bytes for both arguments
+        password_bytes = self._pre_hash(plain_password).encode('utf-8')
+        hashed_bytes = hashed_password.encode('utf-8')
+        return bcrypt.checkpw(password_bytes, hashed_bytes)
 
     def get_password_hash(self, password):
-        return pwd_context.hash(self._pre_hash(password))
+        # bcrypt.hashpw expects bytes for password and salt
+        password_bytes = self._pre_hash(password).encode('utf-8')
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(password_bytes, salt)
+        return hashed.decode('utf-8')
 
     def get_user(self, db: Session, username_or_email: str):
         # Check by username

@@ -15,7 +15,7 @@ faiss-cpu
 python-dotenv
 gTTS
 sentence-transformers
-passlib[bcrypt]
+bcrypt
 python-jose[cryptography]
 sqlalchemy
 psycopg2-binary
