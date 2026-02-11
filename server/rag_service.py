@@ -238,7 +238,7 @@ class RAGService:
         is_greeting = any(query_lower.startswith(g) for g in greetings) and len(query_lower) < 20
         
         if is_greeting:
-            response = "¡Hola! Soy tu Asistente Pedagógico especializado en Pantallas Táctiles. Estoy capacitado con manuales específicos para ayudarte a integrar esta tecnología en tu aula. ¿En qué te puedo ayudar hoy?"
+            response = "¡Hola! Soy tu Asistente Pedagógico Virtual. Estoy aquí para potenciar tus clases. ¿En qué puedo ayudarte hoy?"
             for word in response.split():
                 yield word + " "
                 time.sleep(0.05)
